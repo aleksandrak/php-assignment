@@ -49,7 +49,7 @@ class NoopCalculator extends AbstractCalculator
         }
 
         $stats = new StatisticsTo();
-        foreach ($$averages as $splitPeriod => $average) {
+        foreach ($averages as $splitPeriod => $average) {
             $child = (new StatisticsTo())
                 ->setName($this->parameters->getStatName())
                 ->setSplitPeriod($splitPeriod)
