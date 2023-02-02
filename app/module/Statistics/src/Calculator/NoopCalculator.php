@@ -31,10 +31,8 @@ class NoopCalculator extends AbstractCalculator
 
         $this->postTotals[$key] = ($this->postTotals[$key] ?? 0) + 1;
 
-        if (!isset($this->userList[$key])){
-            $this->userList[$key] = [];
-        }
-        if (!in_array($postTo->getAuthorId(), $this->userList[$key])){
+        $this->userList[$key] = $this->userList[$key] ?? [];
+        if (!in_array($postTo->getAuthorId(), $this->userList[$key])) {
             $this->userList[$key][] = $postTo->getAuthorId();
         }
     }
