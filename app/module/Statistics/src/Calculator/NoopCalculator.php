@@ -44,6 +44,23 @@ class NoopCalculator extends AbstractCalculator
      */
     protected function doCalculate(): StatisticsTo
     {
-        return new StatisticsTo();
+        $averages = [];
+        foreach ($this->postTotals as $key => $postTotal) {
+            $authorCount = count($this->userList[$key]);
+            $averages[$key] = round($postTotal / $authorCount, 1);
+        }
+
+        $stats = new StatisticsTo();
+        foreach ($$averages as $splitPeriod => $average) {
+            $child = (new StatisticsTo())
+                ->setName($this->parameters->getStatName())
+                ->setSplitPeriod($splitPeriod)
+                ->setValue($average)
+                ->setUnits(self::UNITS);
+
+            $stats->addChild($child);
+        }
+
+        return $stats;
     }
 }
