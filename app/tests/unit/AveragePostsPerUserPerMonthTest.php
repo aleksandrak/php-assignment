@@ -19,18 +19,23 @@ use SocialPost\Hydrator\FictionalPostHydrator;
  */
 class AveragePostsPerUserPerMonthTest extends TestCase
 {
-    private $params;
 
-    protected function setUp(): void
+    private function getParams($start, $end): array
     {
-        $startDate = DateTime::createFromFormat('Y-m-d H:i:s', '2018-08-01 00:00:00');
-        $endDate   = DateTime::createFromFormat('Y-m-d H:i:s', '2018-08-31 23:59:59');
-        $this->params = [
+        $startDate = DateTime::createFromFormat('Y-m-d H:i:s', $start);
+        $endDate   = DateTime::createFromFormat('Y-m-d H:i:s', $end);
+        return [
             (new ParamsTo())
                 ->setStatName(StatsEnum::AVERAGE_POSTS_NUMBER_PER_USER_PER_MONTH)
                 ->setStartDate($startDate)
                 ->setEndDate($endDate)
         ];
+    }
+    
+    private function getStats($params, $posts)
+    {
+        $statsService = StatisticsServiceFactory::create();
+        return $statsService->calculateStats($posts, $params);
     }
 
     /**
@@ -41,9 +46,9 @@ class AveragePostsPerUserPerMonthTest extends TestCase
         $postsJson = file_get_contents('./tests/data/average-posts-per-user-per-month-data.json');
         $responseData = json_decode($postsJson, true);
 
+        $params = $this->getParams('2018-08-01 00:00:00', '2018-08-31 23:59:59');
         $posts = $this->fetchPosts($responseData['data']['posts']);
-        $statsService = StatisticsServiceFactory::create();
-        $stats = $statsService->calculateStats($posts, $this->params);
+        $stats = $this->getStats($params, $posts);
 
         $averageStats = $stats->getChildren();
         $allMonthsStats = $averageStats[0]->getChildren();
@@ -56,11 +61,30 @@ class AveragePostsPerUserPerMonthTest extends TestCase
     /**
      * @test
      */
+    public function testRoundingStatNumber(): void
+    {
+        $postsJson = file_get_contents('./tests/data/average-posts-per-user-per-month-data.json');
+        $responseData = json_decode($postsJson, true);
+
+        $params = $this->getParams('2018-09-01 00:00:00', '2018-09-30 23:59:59');
+        $posts = $this->fetchPosts($responseData['data']['posts']);
+        $stats = $this->getStats($params, $posts);
+
+        $averageStats = $stats->getChildren();
+        $allMonthsStats = $averageStats[0]->getChildren();
+        $monthStats = $allMonthsStats[0];
+        $averagePostsPerUserPerMonth = $monthStats->getValue();
+        $this->assertEquals(1.5, $averagePostsPerUserPerMonth);
+    }
+
+    /**
+     * @test
+     */
     public function testForNoPosts(): void
     {
+        $params = $this->getParams('2018-08-01 00:00:00', '2018-08-31 23:59:59');
         $posts = $this->fetchPosts([]);
-        $statsService = StatisticsServiceFactory::create();
-        $stats = $statsService->calculateStats($posts, $this->params);
+        $stats = $this->getStats($params, $posts);
 
         $averageStats = $stats->getChildren();
         $allMonthsStats = $averageStats[0]->getChildren();
