@@ -12,16 +12,16 @@ use Statistics\Enum\StatsEnum;
 use Statistics\Service\Factory\StatisticsServiceFactory;
 use SocialPost\Hydrator\FictionalPostHydrator;
 /**
- * Class ATestTest
+ * Class ATestAveragePostsPerUserPerMonth
  *
  * @package Tests\unit
  */
-class TestTest extends TestCase
+class AveragePostsPerUserPerMonthTest extends TestCase
 {
     /**
      * @test
      */
-    public function testNothing(): void
+    public function testStatsForOneMonth(): void
     {
         $startDate = DateTime::createFromFormat('Y-m-d H:i:s', '2018-08-01 00:00:00');
         $endDate   = DateTime::createFromFormat('Y-m-d H:i:s', '2018-08-31 23:59:59');
