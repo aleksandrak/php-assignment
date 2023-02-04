@@ -21,7 +21,7 @@ class AveragePostsPerUserPerMonthTest extends TestCase
 {
     private $params;
 
-    protected function setUpBeforeClass(): void
+    protected function setUp(): void
     {
         $startDate = DateTime::createFromFormat('Y-m-d H:i:s', '2018-08-01 00:00:00');
         $endDate   = DateTime::createFromFormat('Y-m-d H:i:s', '2018-08-31 23:59:59');
@@ -38,7 +38,7 @@ class AveragePostsPerUserPerMonthTest extends TestCase
      */
     public function testStatsForOneMonth(): void
     {
-        $postsJson = file_get_contents('./tests/data/social-posts-response.json');
+        $postsJson = file_get_contents('./tests/data/average-posts-per-user-per-month-data.json');
         $responseData = json_decode($postsJson, true);
 
         $posts = $this->fetchPosts($responseData['data']['posts']);
