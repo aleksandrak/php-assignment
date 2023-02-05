@@ -41,8 +41,8 @@ class AveragePostsPerUserPerMonth extends AbstractCalculator
     protected function doCalculate(): StatisticsTo
     {
         $averagePostsPerUserPerMonth = 0;
-        $totalPosts = array_sum($this->postTotals);
-        if ($totalPosts > 0) {
+        if (!empty($this->postTotals) && !empty($this->userList)) {
+            $totalPosts = array_sum($this->postTotals);
             $numberOfMonths = count($this->postTotals);
             $numberOfAuthors = count($this->userList);
             $averagePostsPerUserPerMonth = round($totalPosts / $numberOfAuthors / $numberOfMonths, 1);
