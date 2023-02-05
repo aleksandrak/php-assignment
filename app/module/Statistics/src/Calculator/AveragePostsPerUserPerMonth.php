@@ -9,8 +9,7 @@ use Statistics\Dto\StatisticsTo;
 
 class AveragePostsPerUserPerMonth extends AbstractCalculator
 {
-
-    protected const UNITS = 'posts per user';
+    protected const UNITS = 'posts';
 
     /**
      * @var array
@@ -31,9 +30,8 @@ class AveragePostsPerUserPerMonth extends AbstractCalculator
 
         $this->postTotals[$key] = ($this->postTotals[$key] ?? 0) + 1;
 
-        $this->userList[$key] = $this->userList[$key] ?? [];
-        if (!in_array($postTo->getAuthorId(), $this->userList[$key])) {
-            $this->userList[$key][] = $postTo->getAuthorId();
+        if (!in_array($postTo->getAuthorId(), $this->userList)) {
+            $this->userList[] = $postTo->getAuthorId();
         }
     }
 
@@ -42,23 +40,17 @@ class AveragePostsPerUserPerMonth extends AbstractCalculator
      */
     protected function doCalculate(): StatisticsTo
     {
-        $averages = [];
-        foreach ($this->postTotals as $key => $postTotal) {
-            $authorCount = count($this->userList[$key]);
-            $averages[$key] = round($postTotal / $authorCount, 1);
+        $averagePostsPerUserPerMonth = 0;
+        $totalPosts = array_sum($this->postTotals);
+        if ($totalPosts > 0) {
+            $numberOfMonths = count($this->postTotals);
+            $numberOfAuthors = count($this->userList);
+            $averagePostsPerUserPerMonth = round($totalPosts / $numberOfAuthors / $numberOfMonths, 1);
         }
 
-        $stats = new StatisticsTo();
-        foreach ($averages as $splitPeriod => $average) {
-            $child = (new StatisticsTo())
+        return (new StatisticsTo())
                 ->setName($this->parameters->getStatName())
-                ->setSplitPeriod($splitPeriod)
-                ->setValue($average)
+                ->setValue($averagePostsPerUserPerMonth)
                 ->setUnits(self::UNITS);
-
-            $stats->addChild($child);
-        }
-
-        return $stats;
     }
 }
