@@ -19,19 +19,17 @@ use SocialPost\Hydrator\FictionalPostHydrator;
  */
 class AveragePostsPerUserPerMonthTest extends TestCase
 {
+    protected const TEST_FILE = './tests/data/average-posts-per-user-per-month-data.json';
 
     /**
      * @test
      */
     public function testStatsForOneMonth(): void
     {
-        $postsJson = file_get_contents('./tests/data/average-posts-per-user-per-month-data.json');
-        $responseData = json_decode($postsJson, true);
-
+        $posts = $this->getTestPosts();
         $params = $this->getParams('2018-08-01 00:00:00', '2018-08-31 23:59:59');
         
-        $averagePostsPerUserPerMonth = $this->getAveragePostsPerUserPerMonth($responseData['data']['posts'], $params);
-
+        $averagePostsPerUserPerMonth = $this->getAveragePostsPerUserPerMonth($posts, $params);
 
         $this->assertEquals(1, $averagePostsPerUserPerMonth);
     }
@@ -41,12 +39,10 @@ class AveragePostsPerUserPerMonthTest extends TestCase
      */
     public function testStatsForTwoMonths(): void
     {
-        $postsJson = file_get_contents('./tests/data/average-posts-per-user-per-month-data.json');
-        $responseData = json_decode($postsJson, true);
-
+        $posts = $this->getTestPosts();
         $params = $this->getParams('2018-08-01 00:00:00', '2018-09-30 23:59:59');
 
-        $averagePostsPerUserPerMonth = $this->getAveragePostsPerUserPerMonth($responseData['data']['posts'], $params);
+        $averagePostsPerUserPerMonth = $this->getAveragePostsPerUserPerMonth($posts, $params);
 
         $this->assertEquals(0.7, $averagePostsPerUserPerMonth);
     }
@@ -56,11 +52,20 @@ class AveragePostsPerUserPerMonthTest extends TestCase
      */
     public function testForNoPosts(): void
     {
+        $posts = [];
         $params = $this->getParams('2018-08-01 00:00:00', '2018-08-31 23:59:59');
         
-        $averagePostsPerUserPerMonth = $this->getAveragePostsPerUserPerMonth([], $params);
+        $averagePostsPerUserPerMonth = $this->getAveragePostsPerUserPerMonth($posts, $params);
 
         $this->assertEquals(0, $averagePostsPerUserPerMonth);
+    }
+    
+    private function getTestPosts()
+    {
+        $postsJson = file_get_contents(self::TEST_FILE);
+        $responseData = json_decode($postsJson, true);
+
+        return $responseData['data']['posts'];
     }
     
     private function getAveragePostsPerUserPerMonth($posts, $params)
@@ -75,6 +80,7 @@ class AveragePostsPerUserPerMonthTest extends TestCase
     {
         $startDate = DateTime::createFromFormat('Y-m-d H:i:s', $start);
         $endDate   = DateTime::createFromFormat('Y-m-d H:i:s', $end);
+
         return [
             (new ParamsTo())
                 ->setStatName(StatsEnum::AVERAGE_POSTS_NUMBER_PER_USER_PER_MONTH)
@@ -86,6 +92,7 @@ class AveragePostsPerUserPerMonthTest extends TestCase
     private function getStats($params, $posts)
     {
         $statsService = StatisticsServiceFactory::create();
+
         return $statsService->calculateStats($posts, $params);
     }
 
