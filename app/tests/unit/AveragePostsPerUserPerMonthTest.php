@@ -50,10 +50,7 @@ class AveragePostsPerUserPerMonthTest extends TestCase
         $posts = $this->fetchPosts($responseData['data']['posts']);
         $stats = $this->getStats($params, $posts);
 
-        $averageStats = $stats->getChildren();
-        $allMonthsStats = $averageStats[0]->getChildren();
-        $monthStats = $allMonthsStats[0];
-        $averagePostsPerUserPerMonth = $monthStats->getValue();
+        $averagePostsPerUserPerMonth = $stats->getChildren()[0]->getValue();
 
         $this->assertEquals(1, $averagePostsPerUserPerMonth);
     }
@@ -61,20 +58,18 @@ class AveragePostsPerUserPerMonthTest extends TestCase
     /**
      * @test
      */
-    public function testRoundingStatNumber(): void
+    public function testStatsForTwoMonths(): void
     {
         $postsJson = file_get_contents('./tests/data/average-posts-per-user-per-month-data.json');
         $responseData = json_decode($postsJson, true);
 
-        $params = $this->getParams('2018-09-01 00:00:00', '2018-09-30 23:59:59');
+        $params = $this->getParams('2018-08-01 00:00:00', '2018-09-30 23:59:59');
         $posts = $this->fetchPosts($responseData['data']['posts']);
         $stats = $this->getStats($params, $posts);
 
-        $averageStats = $stats->getChildren();
-        $allMonthsStats = $averageStats[0]->getChildren();
-        $monthStats = $allMonthsStats[0];
-        $averagePostsPerUserPerMonth = $monthStats->getValue();
-        $this->assertEquals(1.5, $averagePostsPerUserPerMonth);
+        $averagePostsPerUserPerMonth = $stats->getChildren()[0]->getValue();
+
+        $this->assertEquals(0.7, $averagePostsPerUserPerMonth);
     }
 
     /**
@@ -86,10 +81,9 @@ class AveragePostsPerUserPerMonthTest extends TestCase
         $posts = $this->fetchPosts([]);
         $stats = $this->getStats($params, $posts);
 
-        $averageStats = $stats->getChildren();
-        $allMonthsStats = $averageStats[0]->getChildren();
+        $averagePostsPerUserPerMonth = $stats->getChildren()[0]->getValue();
 
-        $this->assertEmpty($allMonthsStats);
+        $this->assertEquals(0, $averagePostsPerUserPerMonth);
     }
 
     private function fetchPosts($posts) : Traversable {
